@@ -95,7 +95,7 @@ class TwitchBot(commands.Bot):
         # Add required capabilities to detect events like raids
         self._connection.capabilities.append('twitch.tv/tags')
         self._connection.capabilities.append('twitch.tv/commands')
-        self._connection.capabilities.append('twitch.tv/membership')
+        self._connection.capabilities.append('t.tv/membership')
         await super()._connect()
 
     async def event_ready(self):
@@ -129,6 +129,7 @@ class TwitchBot(commands.Bot):
             if output_channel:
                 try:
                     await output_channel.send(f"Thanks {raider} for the raid with {viewers} viewers!")
+                    logger.info(f"Sent raid message to Discord: {raider} raiding with {viewers} viewers.")
                 except discord.errors.HTTPException as e:
                     self.logger.error(f"Failed to send message: {e}")
             else:
@@ -175,6 +176,7 @@ async def post_viewers_list(twitch_username):
                     viewers_list = ', '.join(filtered_users)
                     try:
                         await output_channel.send(f'Active users interacting in {twitch_username}: {viewers_list}')
+                        logger.info(f"Sent active users list for {twitch_username} to Discord.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
                     
@@ -184,12 +186,14 @@ async def post_viewers_list(twitch_username):
                 else:
                     try:
                         await output_channel.send(f'No non-bot chat users detected for {twitch_username}.')
+                        logger.info(f"No non-bot chat users detected for {twitch_username}.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
 
             else:
                 try:
                     await output_channel.send(f'No active chat users detected for {twitch_username}.')
+                    logger.info(f"No active chat users detected for {twitch_username}.")
                 except discord.errors.HTTPException as e:
                     logger.error(f"Failed to send message: {e}")
         except ConnectionResetError as e:
@@ -202,11 +206,13 @@ async def post_viewers_list(twitch_username):
                 viewer_count = stream_data['viewer_count']
                 try:
                     await output_channel.send(f'{twitch_username} currently has {viewer_count} viewers.')
+                    logger.info(f"Sent viewer count for {twitch_username} to Discord: {viewer_count} viewers.")
                 except discord.errors.HTTPException as e:
                     logger.error(f"Failed to send message: {e}")
             else:
                 try:
                     await output_channel.send(f'{twitch_username} is not currently live.')
+                    logger.info(f"{twitch_username} is not currently live.")
                 except discord.errors.HTTPException as e:
                     logger.error(f"Failed to send message: {e}")
         except ConnectionResetError as e:
@@ -227,6 +233,7 @@ async def start_tracking(twitch_username):
         active_links[twitch_username] = task
         try:
             await output_channel.send(f'Started tracking {twitch_username}.')
+            logger.info(f"Started tracking {twitch_username}.")
         except discord.errors.HTTPException as e:
             logger.error(f"Failed to send message: {e}")
         await twitch_bot.join_channels([twitch_username])
@@ -237,7 +244,11 @@ async def on_ready():
     logger.info(f'We have logged in as {client.user}')
     output_channel = client.get_channel(OUTPUT_CHANNEL_ID)
     if output_channel:
-        await output_channel.send("Bot is online and ready!")
+        try:
+            await output_channel.send("Bot is online and ready!")
+            logger.info("Sent message: Bot is online and ready!")
+        except discord.errors.HTTPException as e:
+            logger.error(f"Failed to send message: {e}")
     else:
         logger.error("Output channel not found.")
 
@@ -285,6 +296,7 @@ async def on_message_delete(message):
                     task.cancel()
                     try:
                         await output_channel.send(f'Stopped tracking {twitch_username} as the link was removed.')
+                        logger.info(f"Stopped tracking {twitch_username} as the link was removed.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
 
@@ -309,11 +321,13 @@ async def on_message_delete(message):
                     single_user_list = ', '.join(reversed(single_appearance_users))
                     try:
                         await output_channel.send(f'Users who appeared in only one list: {single_user_list}')
+                        logger.info(f"Sent single appearance users list.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
                 else:
                     try:
                         await output_channel.send('No users appeared in only one list.')
+                        logger.info(f"No users appeared in only one list.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
 
@@ -322,11 +336,13 @@ async def on_message_delete(message):
                     multi_user_list = ', '.join(reversed(multi_appearance_users))
                     try:
                         await output_channel.send(f'Users who appeared in multiple lists: {multi_user_list}')
+                        logger.info(f"Sent multiple appearance users list.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
                 else:
                     try:
                         await output_channel.send('No users appeared in more than one list.')
+                        logger.info(f"No users appeared in more than one list.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
 
@@ -335,11 +351,13 @@ async def on_message_delete(message):
                     raiders_list = ', '.join(raiders)
                     try:
                         await output_channel.send(f'Users who raided the channel: {raiders_list}')
+                        logger.info(f"Sent raiders list.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
                 else:
                     try:
                         await output_channel.send('No users raided the channel.')
+                        logger.info(f"No users raided the channel.")
                     except discord.errors.HTTPException as e:
                         logger.error(f"Failed to send message: {e}")
 
