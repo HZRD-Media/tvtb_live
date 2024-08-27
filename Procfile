@@ -1,1 +1,1 @@
-worker: python3 ViewerBot.py
+web: python3 ViewerBot.py
