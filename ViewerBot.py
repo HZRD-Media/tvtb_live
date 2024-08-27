@@ -12,10 +12,6 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
-env_path = r'C:\Users\Harry\Documents\Python Projects\Twitch Viewer Audit\venv\botdetails.env'
-load_dotenv(dotenv_path=env_path)
-
 # Discord bot token and Twitch API credentials from environment variables
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 TWITCH_CLIENT_ID = os.getenv('TWITCH_CLIENT_ID')
