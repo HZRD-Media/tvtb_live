@@ -1,0 +1,5 @@
+discord.py
+twitchio
+aiohttp
+requests
+python-dotenv
