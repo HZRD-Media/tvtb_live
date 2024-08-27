@@ -20,8 +20,23 @@ TWITCH_OAUTH_TOKEN = os.getenv('TWITCH_OAUTH_TOKEN')
 TWITCH_NICKNAME = os.getenv('TWITCH_NICKNAME')  # Your bot's or your Twitch username
 
 # Load the Discord channel IDs from environment variables
-TRACK_CHANNEL_ID = int(os.getenv('TRACK_CHANNEL_ID'))  # Replace with your tracking channel ID
-OUTPUT_CHANNEL_ID = int(os.getenv('OUTPUT_CHANNEL_ID'))  # Replace with your output channel ID
+TRACK_CHANNEL_ID = os.getenv('TRACK_CHANNEL_ID')
+OUTPUT_CHANNEL_ID = os.getenv('OUTPUT_CHANNEL_ID')
+
+# Log environment variable values (ensure no sensitive info is logged in production)
+logger.info(f'DISCORD_TOKEN: {DISCORD_TOKEN}')
+logger.info(f'TWITCH_CLIENT_ID: {TWITCH_CLIENT_ID}')
+logger.info(f'TWITCH_CLIENT_SECRET: {TWITCH_CLIENT_SECRET}')
+logger.info(f'TRACK_CHANNEL_ID: {TRACK_CHANNEL_ID}')
+logger.info(f'OUTPUT_CHANNEL_ID: {OUTPUT_CHANNEL_ID}')
+
+# Ensure channel IDs are set and convert them to integers
+if TRACK_CHANNEL_ID is None or OUTPUT_CHANNEL_ID is None:
+    logger.error("Channel IDs are not set correctly in the environment variables.")
+    raise ValueError("Channel IDs are required.")
+
+TRACK_CHANNEL_ID = int(TRACK_CHANNEL_ID)
+OUTPUT_CHANNEL_ID = int(OUTPUT_CHANNEL_ID)
 
 # URL to the bot_usernames.json file in your GitHub repository
 bot_usernames_url = 'https://raw.githubusercontent.com/HZRD-Media/Twitch-Viewer-Tracker-Discord-Bot/main/bot_usernames.json'
@@ -220,6 +235,11 @@ async def start_tracking(twitch_username):
 @client.event
 async def on_ready():
     logger.info(f'We have logged in as {client.user}')
+    output_channel = client.get_channel(OUTPUT_CHANNEL_ID)
+    if output_channel:
+        await output_channel.send("Bot is online and ready!")
+    else:
+        logger.error("Output channel not found.")
 
 # Event: Message received
 @client.event
